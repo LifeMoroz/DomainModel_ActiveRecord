@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Список шаблонов</h1>
+{% for object in object_list %}
+    <h2><a href="{% url 'edit' object.id%}">{{ object.title }}</a>  <a style="color: red; text-decoration: none;" href="{% url 'remove' object.id%}">x</a></h2>
+    {% for template_part in object.object_list %}
+        {{ template_part.value|safe }}
+    {% endfor %}
+{% endfor %}
+</body>
+</html>

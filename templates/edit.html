@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form id="form" method="POST">
+    <input type="text" size="40" value="{{ object.title }}" /><br><br>
+    {% for template_part in object.object_list %}
+        {% with forloop.counter0 as counter  %}
+            {% if template_part.table_name == 'element' %}
+                <select class="elems" name="elem">
+                    {% for el in elems %}
+                        <option value="{{ counter }}_{{ el.id }}" {% if el.id == template_part.id %}selected="selected"{% endif %}>{{ el.value }}</option>
+                    {% endfor %}
+                </select>
+            {% endif %}
+            {% if template_part.table_name == 'fieldsubstitution' %}
+                <select class="fs" name="fs">
+                    {% for el in fs %}
+                        <option value="{{ counter }}_{{ el.id }}" {% if el.id == template_part.id %}selected="selected"{% endif %}>{{ el.value }}</option>
+                    {% endfor %}
+                </select>
+            {% endif %}
+        {% endwith %}
+    {% endfor %}
+    <script>
+        counter = {{ object.object_list|length }};
+        function create(htmlStr) {
+            var frag = document.createDocumentFragment(),
+                temp = document.createElement('div');
+            temp.innerHTML = htmlStr;
+            while (temp.firstChild) {
+                frag.appendChild(temp.firstChild);
+            }
+            return frag;
+        }
+        form = document.getElementById('form');
+        function add_elem()
+        {
+            form.insertBefore(create("<select name='elem'>{% for el in elems %}<option value='" + counter + "_{{ el.id }}'>{{ el.value }}</option>{% endfor %}</select>"), document.getElementById('1'));
+            counter += 1
+        }
+        function add_fieldsubstitution()
+        {
+            form.insertBefore(create("<select name='fs'>{% for el in fs %}<option value='" + counter + "_{{ el.id }}'>{{ el.value }}</option>{% endfor %}</select>"), document.getElementById('1'));
+            counter += 1
+        }
+    </script>
+    <a id='1' href="#" onclick="add_elem()">add element</a>
+    <a href="#" onclick="add_fieldsubstitution()">add fieldsubstitution</a><br><br>
+    <button type="submit">Сохранить</button>
+    {% csrf_token %}
+    </form>
+</body>
+</html>
