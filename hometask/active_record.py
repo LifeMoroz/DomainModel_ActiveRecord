@@ -17,9 +17,8 @@ class BaseActiveRecord:
                 setattr(self, key, args[i])
 
         elif kwargs:
-            for key in self.__dir__():
-                if isinstance(getattr(self, key), Field):
-                    setattr(self, key, kwargs.get(key))
+            for key in self.fields():
+                setattr(self, key, kwargs.get(key))
         else:
             raise Exception
 
@@ -60,13 +59,15 @@ class BaseActiveRecord:
         to_save = {}
         for key in self.fields():
             to_save[key] = getattr(self, key)
-            if key == 'id' and to_save[key] is None:  # Получаем новый id
+            if key == 'id' and not isinstance(to_save[key], int):  # Получаем новый id
                 to_save['id'] = max([x.id for x in self.find()] or [0]) + 1
+                setattr(self, 'id', to_save['id'])
         fields = ', '.join(to_save.keys())
         values = ':' + ', :'.join(to_save.keys())
         sql = "REPLACE INTO {table_name} ({fields}) VALUES ({values})"
         sql = sql.format(table_name=self.table_name, fields=fields, values=values)
         Database.get_database().execute(sql, to_save)
+        return self
 
     def delete(self):
         sql = "DELETE FROM {table_name} WHERE id={id}".format(table_name=self.table_name, id=self.id)

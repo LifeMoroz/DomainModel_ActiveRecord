@@ -1,9 +1,9 @@
-from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 from django.views.generic import View
 
-from hometask.models import Document, Element, Template, FieldSubstitution, DE, DFS
+from hometask.models import Document, Element, FieldSubstitution, DE, DFS
 
 
 class DocumentBased:
@@ -12,16 +12,13 @@ class DocumentBased:
 
 class DocumentList(DocumentBased, View):
     def get(self, request, *args, **kwargs):
-        print(self.model.find()[0].title)
         return render(request, 'list.html', {'object_list': self.model.find()})
 
 
 class DocumentAdd(DocumentBased, View):
     def get(self, request, *args, **kwargs):
-        return render(request, 'add.html', {})
-
-    def post(self, request, *args, **kwargs):
-        self.model.find(id=id)[0].delete()
+        new = self.model(title='New template').save()
+        return HttpResponseRedirect(reverse('edit', kwargs={'id': new.id}))
 
 
 class DocumentDelete(DocumentBased, View):
