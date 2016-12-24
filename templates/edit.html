@@ -7,7 +7,7 @@
 <body>
 <a href="{% url 'list' %}">back to list</a><br><br>
     <form id="form" method="POST">
-    <input type="text" size="40" value="{{ object.title }}" /><br><br>
+    <input type="text" size="40" value="{{ object.title }}" name="title" /><br><br>
     {% for template_part in object.object_list %}
         {% with forloop.counter0 as counter  %}
             {% if template_part.table_name == 'element' %}

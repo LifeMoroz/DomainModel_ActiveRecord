@@ -23,7 +23,10 @@ class DocumentAdd(DocumentBased, View):
 
 class DocumentDelete(DocumentBased, View):
     def get(self, request, *args, **kwargs):
-        self.model.find(id=kwargs['id'])[0].delete()
+        obj = self.model.find(id=kwargs['id'])[0]
+        obj.clear_template()
+        obj.delete()
+        return HttpResponseRedirect(reverse('list'))
 
 
 class DocumentEdit(DocumentBased, View):
@@ -50,4 +53,8 @@ class DocumentEdit(DocumentBased, View):
         for elem in fs:
             position, _id = elem.split('_')
             DFS(fs=_id, document=obj.id, position=position).save()
+
+        title = self.request.POST['title']
+        obj.title = title
+        obj.save()
         return HttpResponseRedirect('/list/')
