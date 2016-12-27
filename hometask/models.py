@@ -38,9 +38,13 @@ class DFS(BaseActiveRecord):
         return self._fsub.find(id=self.fs)[0]
 
 
+TEMPLATE_CHOICES = ['doc', 'html', 'txt']
+
+
 class Document(BaseActiveRecord):
     table_name = 'document'
     title = Field()
+    template = Field()
     to_el = DE
     to_fs = DFS
 
@@ -56,3 +60,8 @@ class Document(BaseActiveRecord):
         conn_fs = self.to_fs.find(document=self.id)
         items = sorted(conn_elems + conn_fs, key=lambda x: x.position)
         return [it.related_value() for it in items]
+
+    def save(self):
+        if self.template not in TEMPLATE_CHOICES:
+            raise ValueError('Нет такого формата')
+        super().save()

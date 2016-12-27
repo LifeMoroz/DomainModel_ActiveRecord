@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views.generic import View
 
-from hometask.models import Document, Element, FieldSubstitution, DE, DFS
+from hometask.models import Document, Element, FieldSubstitution, DE, DFS, TEMPLATE_CHOICES
 
 
 class DocumentBased:
@@ -34,7 +34,7 @@ class DocumentEdit(DocumentBased, View):
         obj = self.model.find(id=kwargs['id'])[0]
         elems_list = Element.find()
         fs = FieldSubstitution.find()
-        return render(request, 'edit.html', {'object': obj, 'elems': elems_list, 'fs': fs})
+        return render(request, 'edit.html', {'object': obj, 'elems': elems_list, 'fs': fs, 'tformats': TEMPLATE_CHOICES})
 
     def post(self, request, *args, **kwargs):
         elems = self.request.POST.getlist('elem')
@@ -56,5 +56,6 @@ class DocumentEdit(DocumentBased, View):
 
         title = self.request.POST['title']
         obj.title = title
+        obj.template = self.request.POST['format']
         obj.save()
-        return HttpResponseRedirect('/list/')
+        return HttpResponseRedirect(reverse('list'))

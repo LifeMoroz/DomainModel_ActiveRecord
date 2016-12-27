@@ -18,7 +18,7 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
-    url(r'list/', views.DocumentList.as_view(), name='list'),
+    url(r'^$', views.DocumentList.as_view(), name='list'),
     url(r'add/', views.DocumentAdd.as_view(), name='add'),
     url(r'edit/(?P<id>\d+)/', views.DocumentEdit.as_view(), name='edit'),
     url(r'remove/(?P<id>\d+)/', views.DocumentDelete.as_view(), name='remove')
