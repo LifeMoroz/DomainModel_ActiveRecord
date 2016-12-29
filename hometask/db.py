@@ -3,6 +3,9 @@ from django.conf import settings
 
 
 class Database:
+    """
+    Класс обертка над базой, изолирует инициализацию БД и курсора
+    """
     db = None
 
     def __init__(self):

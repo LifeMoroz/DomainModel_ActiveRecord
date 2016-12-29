@@ -2,73 +2,92 @@ from hometask.db import Database
 
 
 class Field:
+    """
+    Класс, экземпляр которого говорит нам о том, что это поле в базе
+    """
     pass
 
 
 class BaseActiveRecord:
-    table_name = None
+    """
+    Базовый класс реализующий основную функциональность ActiveRecord
+    """
+    table_name = None  # Имя таблицы
     id = Field()  # PK by default
 
     def __init__(self, *args, **kwargs):
         # Умная сборка объекта. Все что передано проставляем в объект.
         # Наследники будут определять что должно быть.
-        if args:
-            for i, key in enumerate(self.fields()):
-                setattr(self, key, args[i])
+        """
+        Конструктор
+        :param args: неименованные аргументы
+        :param kwargs: именованные аргументы
+        """
+        if args:  # Если есть неименованные аргументы, то
+            for i, key in enumerate(self.fields()):  # для каждого поля класса, которое является полем в базе
+                setattr(self, key, args[i])  # записываем из списка неименованных аргументов значение в объект класса
 
-        elif kwargs:
-            for key in self.fields():
-                setattr(self, key, kwargs.get(key))
+        elif kwargs:  # Иначе, если есть именованные аргументы, то
+            for key in self.fields():  # для каждого поля класса, которое является полем в базе
+                setattr(self, key, kwargs.get(key))  # Получаем его значение из аргументов и записываем в экземляр
         else:
             raise Exception
 
-    @classmethod
+    @classmethod  # Тоже, что и static, только первым параметром идет cls, который является ссылкой на текущий класса
     def fields(cls):
-        fields = []
-        for key in dir(cls):
-            if isinstance(getattr(cls, key), Field):
-                fields.append(key)
-        return fields
+        fields = []  # Пустой список
+        for key in dir(cls):  # Для всех атрибутов класса
+            if isinstance(getattr(cls, key), Field):  # проверить, является ли значение атрибута класса полем в базе
+                fields.append(key)  # ЗАписать в список полей
+        return fields  # Вернуть список полей
 
-    @classmethod
+    @classmethod  # Тоже, что и static, только первым параметром идет cls, который является ссылкой на текущий класса
     def find(cls, **kwargs):
         """
-
-        :param kwargs:
-        :return: list(gateway)
+        Отвечает за поиск по параметрам.
+        :param kwargs: именованные аргументы
+        :return: list объектов типа текущего cls
         """
-        where = ''
-        data = []
-        for key, value in kwargs.items():
-            if where:
-                where += ' and '
-            else:
-                where = 'WHERE '
-            if isinstance(value, list):
-                where += '{} IN ({})'.format(key, ', '.join([str(x) for x in value]))
-            else:
-                where += '{}=?'.format(key)
-                data.append(value)
-        sql = "SELECT {fields} FROM {table_name} {where}".format(fields=', '.join(cls.fields()), table_name=cls.table_name, where=where)
-        result = []
-        for row in Database.get_database().execute(sql, data).fetchall():
-            result.append(cls(*row))
-        return result
+        where = ''  # пустая строка
+        data = []  # пустой список
+        for key, value in kwargs.items():  # Для всех параметров поиска, получить ключ и значение
+            if where:  # Если условие не пусто
+                where += ' and '  # Добавить and в sql условие
+            else:  # Иначе
+                where = 'WHERE '  # sql условие начинается с WHERE
+            if isinstance(value, list):  # Если значение, по которому производится поиск - массив, то
+                where += '{} IN ({})'.format(key, ', '.join([str(x) for x in value]))  # Искать как по списку объектов
+            else:  # Иначе
+                where += '{}=?'.format(key)  # Поиск по одному значению
+                data.append(value)  # Записать значение параметра поиска в список параметров поиска
+        sql = "SELECT {fields} FROM {table_name} {where}"  # Формируем каркас запроса
+        sql = sql.format(fields=', '.join(cls.fields()), table_name=cls.table_name, where=where)  # Выставляем поля которые хотим получить, имя таблицы и условия по которым искать
+        result = []  # пустой массив
+        for row in Database.get_database().execute(sql, data).fetchall():  # Выполнить sql запрос в БД
+            result.append(cls(*row))  # Инициалировать экземдяр класса строкой из базы
+        return result  # вернуть результат
 
     def save(self):
-        to_save = {}
-        for key in self.fields():
-            to_save[key] = getattr(self, key)
+        """
+        Сохраняет объект в базу, если существует - обновит, если нет - выполнит вставку
+        :return: self
+        """
+        to_save = {}  # Поля для сохранения, пустой словарь
+        for key in self.fields():  # Для каждого поля в базе
+            to_save[key] = getattr(self, key)  # Получить значения соответствующего поля из экземпляра
             if key == 'id' and not isinstance(to_save[key], int):  # Получаем новый id
-                to_save['id'] = max([x.id for x in self.find()] or [0]) + 1
-                setattr(self, 'id', to_save['id'])
-        fields = ', '.join(to_save.keys())
-        values = ':' + ', :'.join(to_save.keys())
-        sql = "REPLACE INTO {table_name} ({fields}) VALUES ({values})"
-        sql = sql.format(table_name=self.table_name, fields=fields, values=values)
-        Database.get_database().execute(sql, to_save)
+                to_save['id'] = max([x.id for x in self.find()] or [0]) + 1  # Находим максимальный id в базе и добавляем к нему 1
+                setattr(self, 'id', to_save['id'])  # Записываем в экземпляр класса
+        fields = ', '.join(to_save.keys())  # Поля для вставки/обновления
+        values = ':' + ', :'.join(to_save.keys())  # В каком порядке будем подставлять
+        sql = "REPLACE INTO {table_name} ({fields}) VALUES ({values})"  # Каркас Sql запроса
+        sql = sql.format(table_name=self.table_name, fields=fields, values=values)  # Выставляем поля которые хотим записать, имя таблицы и значения полей
+        Database.get_database().execute(sql, to_save)  # Выполнить запрос в бд
         return self
 
     def delete(self):
-        sql = "DELETE FROM {table_name} WHERE id={id}".format(table_name=self.table_name, id=self.id)
-        Database.get_database().execute(sql)
+        """
+        Удалить объект из базы
+        """
+        sql = "DELETE FROM {table_name} WHERE id={id}".format(table_name=self.table_name, id=self.id)  # Каркас sql и сразу подставляем имя таблицы и id записи, которую будем удалять
+        Database.get_database().execute(sql)  # Исполняем sql
