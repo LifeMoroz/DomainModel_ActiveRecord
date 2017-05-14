@@ -13,11 +13,11 @@ class Database:
         self._cursor = self._conn.cursor()
 
     @classmethod
-    def get_database(cls, path):
+    def get_database(cls, path):  # Несовместимые с клиентами интерфейс
         return ProjectDatabase(path)
 
-    @staticmethod
-    def execute(sql, params=None, unescape=None):
+    @classmethod
+    def execute(cls, sql, params=None, unescape=None):
         self = ProjectDatabase.get_database()
         sql = sql.format(unescape) if unescape else sql
         try:
@@ -31,5 +31,5 @@ class Database:
 
 class ProjectDatabase(Database):
     @classmethod
-    def get_database(cls):
+    def get_database(cls):  # Приводим к совместимому
         return ProjectDatabase(settings.DATABASES['default']['NAME'])
