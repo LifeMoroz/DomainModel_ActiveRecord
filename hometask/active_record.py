@@ -1,4 +1,4 @@
-from hometask.db import Database
+from hometask.db import ProjectDatabase
 
 
 class Field:
@@ -63,7 +63,7 @@ class BaseActiveRecord:
         sql = "SELECT {fields} FROM {table_name} {where}"  # Формируем каркас запроса
         sql = sql.format(fields=', '.join(cls.fields()), table_name=cls.table_name, where=where)  # Выставляем поля которые хотим получить, имя таблицы и условия по которым искать
         result = []  # пустой массив
-        for row in Database.get_database().execute(sql, data).fetchall():  # Выполнить sql запрос в БД
+        for row in ProjectDatabase.get_database().execute(sql, data).fetchall():  # Выполнить sql запрос в БД
             result.append(cls(*row))  # Инициалировать экземдяр класса строкой из базы
         return result  # вернуть результат
 
@@ -82,7 +82,7 @@ class BaseActiveRecord:
         values = ':' + ', :'.join(to_save.keys())  # В каком порядке будем подставлять
         sql = "REPLACE INTO {table_name} ({fields}) VALUES ({values})"  # Каркас Sql запроса
         sql = sql.format(table_name=self.table_name, fields=fields, values=values)  # Выставляем поля которые хотим записать, имя таблицы и значения полей
-        Database.get_database().execute(sql, to_save)  # Выполнить запрос в бд
+        ProjectDatabase.get_database().execute(sql, to_save)  # Выполнить запрос в бд
         return self
 
     def delete(self):
@@ -90,4 +90,4 @@ class BaseActiveRecord:
         Удалить объект из базы
         """
         sql = "DELETE FROM {table_name} WHERE id={id}".format(table_name=self.table_name, id=self.id)  # Каркас sql и сразу подставляем имя таблицы и id записи, которую будем удалять
-        Database.get_database().execute(sql)  # Исполняем sql
+        ProjectDatabase.get_database().execute(sql)  # Исполняем sql

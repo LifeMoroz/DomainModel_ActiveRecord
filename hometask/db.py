@@ -8,17 +8,17 @@ class Database:
     """
     db = None
 
-    def __init__(self):
-        self._conn = sqlite3.connect(settings.DATABASES['default']['NAME'])
+    def __init__(self, path):
+        self._conn = sqlite3.connect(path)
         self._cursor = self._conn.cursor()
 
-    @staticmethod
-    def get_database():
-        return Database()
+    @classmethod
+    def get_database(cls, path):
+        return ProjectDatabase(path)
 
     @staticmethod
     def execute(sql, params=None, unescape=None):
-        self = Database.get_database()
+        self = ProjectDatabase.get_database()
         sql = sql.format(unescape) if unescape else sql
         try:
             if params:
@@ -28,3 +28,8 @@ class Database:
         finally:
             self._conn.commit()
 
+
+class ProjectDatabase(Database):
+    @classmethod
+    def get_database(cls):
+        return ProjectDatabase(settings.DATABASES['default']['NAME'])
