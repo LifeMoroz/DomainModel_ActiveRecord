@@ -1,18 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<a href="/add/">Добавить новый шаблон</a>
-<h1>Список шаблонов</h1>
-{% for object in object_list %}
-    <h2><a href="{% url 'edit' object.id%}">{{ object.title }}</a>  <a style="color: red; text-decoration: none;" href="{% url 'remove' object.id%}">x</a></h2>
-    <label>Формат: </label>"{{ object.template }}"<br><br>
-    {% for template_part in object.object_list %}
-        {{ template_part.value|safe }}
-    {% endfor %}
-{% endfor %}
+  {% include "inc/head.html" %}
+
+  <body>
+
+    {% with active=1 %}
+        {% include 'inc/nav.html' %}
+    {% endwith %}
+    <div class="container">
+
+      <div class="blog-header">
+        <h2 class="blog-title">Список шаблонов</h2>
+      </div>
+      <div class="row">
+
+        <div class="col-sm-8 blog-main">
+        {% for object in object_list %}
+          <div class="blog-post">
+            <h3 class="blog-post-title">{{ object.title }}</h3>
+              <p class="blog-post-meta"><label>Формат: </label>"{{ object.template }}" <a href="{% url 'edit' object.id%}">Edit</a> <a style="color: red; text-decoration: none;" href="{% url 'remove' object.id%}">Delete</a></p>
+                {% for template_part in object.object_list %}
+                    {% if template_part.table_name == 'fieldsubstitution' %}<input style="height: 1.2em" placeholder="{{ template_part.value|safe }}" />
+                    {% else %}{{ template_part.value|safe }}{% endif %}
+                {% endfor %}
+          </div><!-- /.blog-post -->
+        {% endfor %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
 </body>
 </html>

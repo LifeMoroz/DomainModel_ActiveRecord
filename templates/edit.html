@@ -1,18 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+{% include "inc/head.html" %}
 <body>
-<a href="{% url 'list' %}">back to list</a><br><br>
+{% include "inc/nav.html" %}
+  <div class="container">
+    <div class="blog-header">
+        <h2 class="blog-title">Редактирование шаблона</h2>
+    </div>
     <form id="form" method="POST">
-    <input type="text" size="40" value="{{ object.title }}" name="title" /><br><br>
+
+    <div class="fieldWrapper">
+        <label>Название</label> <input type="text" size="40" value="{{ object.title }}" name="title" />
+    </div>
+
+    <div class="fieldWrapper">
+        {{ field.errors }}
+        {{ field.label_tag }} {{ field }}
+        {% if field.help_text %}
+        <p class="help">{{ field.help_text|safe }}</p>
+        {% endif %}
+    </div>
     <label>Формат шаблона: </label> <select name="format">
         {% for format in tformats %}
             <option value="{{ format }}" {% if format == object.template %}selected="selected"{% endif %}>{{ format}}</option>
         {% endfor %}
     </select><br><br>
+
+    <div class="fieldWrapper" style="margin-bottom: 10px">
     {% for template_part in object.object_list %}
         {% with forloop.counter0 as counter  %}
             {% if template_part.table_name == 'element' %}
@@ -31,6 +45,7 @@
             {% endif %}
         {% endwith %}
     {% endfor %}
+    </div>
     <script>
         counter = {{ object.object_list|length }};
         function create(htmlStr) {
@@ -54,10 +69,12 @@
             counter += 1
         }
     </script>
-    <a id='1' href="#" onclick="add_elem()">add element</a>
-    <a href="#" onclick="add_fieldsubstitution()">add fieldsubstitution</a><br><br>
-    <button type="submit">Сохранить</button>
+    <button class="btn btn-default" type="submit">+ Элемент</button>
+    <button class="btn btn-default" type="submit">+ Поле подстановки</button>
+
+    <button class="btn btn-info" type="submit">Сохранить</button>
     {% csrf_token %}
     </form>
+    </div>
 </body>
 </html>
