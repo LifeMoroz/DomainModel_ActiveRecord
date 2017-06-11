@@ -7,5 +7,11 @@
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/hometask/example.db</jdbc-url>
     </data-source>
+    <data-source source="LOCAL" name="filename.db" uuid="97181e0d-7699-4eb0-a209-855fb492a00c">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:$USER_HOME$/Documents/Visual Studio 2012/Projects/WindowsFormsApplication1/WindowsFormsApplication1/bin/x86/Debug/filename.db</jdbc-url>
+    </data-source>
   </component>
 </project>

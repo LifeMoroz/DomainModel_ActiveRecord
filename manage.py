@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 import sys
-sys.path.append('C:\\Users\\LifeMoroz\\AppData\\Local\\Programs\\Python\\Python35-32\\Lib\\site-packages\\')
+
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "site.settings")
